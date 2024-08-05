@@ -1,7 +1,7 @@
 {
   "name": "stocknewsbot",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "dist/main.js",
   "type": "module",
   "repository": "git@github.com:royyanbach/stocknewsbot.git",
   "author": "royyanbach <royyanbach@users.noreply.github.com>",
@@ -11,5 +11,14 @@
     "node-fetch": "^3.3.2",
     "node-html-parser": "^6.1.13",
     "p-limit": "^6.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "npx functions-framework --target=getAll",
+    "prestart": "npm run build",
+    "gcp-build": "npm run build"
   }
 }

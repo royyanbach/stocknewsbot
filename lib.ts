@@ -1,14 +1,14 @@
 import fetch from 'node-fetch';
 import { parse } from 'node-html-parser';
 import pLimit from 'p-limit';
-import { padNumberToString } from './utils.js';
+import { padNumberToString } from './utils';
 
 const ITEMS_PER_PAGE = 20;
 const CONCURRENCY = 5;
 
 const limit = pLimit(CONCURRENCY);
 
-export async function fetchNewsDetail(link) {
+export async function fetchNewsDetail(link: string) {
   try {
     const response = await fetch(link);
     const body = await response.text();
@@ -35,12 +35,18 @@ export async function fetchNewsDetail(link) {
   }
 }
 
+type NewsItem = {
+  link: string;
+  totalPage: number;
+  title: string;
+};
+
 export async function fetchNewsList({
   date: _date,
   month: _month,
   year,
   page,
-}) {
+}): Promise<NewsItem[]> {
   let list = [];
   try {
     const date = padNumberToString(_date);
@@ -61,7 +67,7 @@ export async function fetchNewsList({
     const numberedNavigations = navigations.filter((item) => !isNaN(parseInt(item.text, 10)));
 
     return articles.map((item) => ({
-      link: item.getAttribute('href'),
+      link: item.getAttribute('href') || '',
       totalPage: numberedNavigations.length || 1,
       title: item.text,
     }));
@@ -75,8 +81,8 @@ export async function fetchAllNewsByDate({
   date,
   month,
   year,
-}) {
-  let list = [];
+}): Promise<NewsItem[]> {
+  let list: NewsItem[] = [];
   try {
     const response = await fetchNewsList({
       date,
@@ -106,12 +112,16 @@ export async function fetchAllNewsByDate({
   }
 }
 
+type NewsItemWithDetail = NewsItem & {
+  content: string;
+};
+
 export async function fetchAllNewsByDateWithDetail({
   date,
   month,
   year,
 }) {
-  let list = [];
+  let list: NewsItemWithDetail[] = [];
   try {
     const response = await fetchAllNewsByDate({
       date,
@@ -119,6 +129,7 @@ export async function fetchAllNewsByDateWithDetail({
       year,
     });
 
+    // @ts-ignore
     list = await Promise.all(
       response.map((item) => limit(() => {
         const url = new URL(item.link);
