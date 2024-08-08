@@ -1,0 +1,56 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  GCP_REGION: asia-southeast2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v2
+      # - uses: actions/cache@v3
+      #   with:
+      #     path: "**/node_modules"
+      #     key: yarn-${{ hashFiles('**/yarn.lock') }}
+      #     restore-keys: yarn-
+      # - name: Install dependencies
+      #   shell: bash
+      #   run: yarn install --ignore-optional --frozen-lockfile
+      - run: rm -rf node_modules README.md .git .github .vscode .gitignore  # temporary
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Deploy to Google Cloud Functions
+        id: deploy
+        uses: google-github-actions/deploy-cloud-functions@v2
+        with:
+          # Name of the Cloud Function, same as the entry point name
+          name: stocknews
+          # Runtime to use for the function
+          runtime: nodejs20
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          max_instances: 5
+          timeout: 60
+          region: ${{ env.GCP_REGION }}
+          env_vars: |
+            GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},
+            GOOGLE_CLOUD_REGION=${{ env.GCP_REGION }},
+          #   NOTION_HABIT_DATABASE_ID=${{ secrets.NOTION_HABIT_DATABASE_ID }},
+          #   NOTION_TOKEN=${{ secrets.NOTION_TOKEN }},
+          #   OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+          #   TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }},
+          #   TELEGRAM_WHITELISTED_USER_IDS=${{ secrets.TELEGRAM_WHITELISTED_USER_IDS }},
+          secret_volumes: "/secret/GCP_SA_KEY.json=projects/716242506068/secrets/maudy-sa-key"
