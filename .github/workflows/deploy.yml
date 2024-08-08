@@ -20,14 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      # - uses: actions/cache@v3
-      #   with:
-      #     path: "**/node_modules"
-      #     key: yarn-${{ hashFiles('**/yarn.lock') }}
-      #     restore-keys: yarn-
-      # - name: Install dependencies
-      #   shell: bash
-      #   run: yarn install --ignore-optional --frozen-lockfile
       - run: rm -rf node_modules README.md .git .github .vscode .gitignore  # temporary
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
@@ -37,9 +29,7 @@ jobs:
         id: deploy
         uses: google-github-actions/deploy-cloud-functions@v2
         with:
-          # Name of the Cloud Function, same as the entry point name
-          name: stocknews
-          # Runtime to use for the function
+          name: getAllStockNews
           runtime: nodejs20
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           max_instances: 5
