@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "npx functions-framework --target=getAll",
+    "start": "npx functions-framework --target=getAllStockNews",
     "prestart": "npm run build",
     "gcp-build": "npm run build"
   }
