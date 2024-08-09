@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { parse } from 'node-html-parser';
 import pLimit from 'p-limit';
+import mongoDBClient from '../service/mongodb';
 import { padNumberToString } from '../utils';
 
 const ITEMS_PER_PAGE = 20;
@@ -36,6 +37,7 @@ export async function fetchNewsDetail(link: string) {
 }
 
 type NewsItem = {
+  crawledAt: Date;
   link: string;
   totalPage: number;
   title: string;
@@ -72,6 +74,7 @@ export async function fetchNewsList({
     const numberedNavigations = navigations.filter((item) => !isNaN(parseInt(item.text, 10)));
 
     return articles.map((item) => ({
+      crawledAt: new Date(),
       link: item.getAttribute('href') || '',
       totalPage: numberedNavigations.length || 1,
       title: item.text,
@@ -121,9 +124,9 @@ export async function fetchAllNewsByDate({
   }
 }
 
-type NewsItemWithDetail = NewsItem & {
+type NewsItemWithDetail = Omit<NewsItem & {
   content: string;
-};
+}, 'totalPage'>;
 
 export async function fetchAllNewsByDateWithDetail({
   date,
@@ -142,9 +145,16 @@ export async function fetchAllNewsByDateWithDetail({
       year,
     });
 
+    const itemLinks = response.map((item) => item.link);
+    const db = mongoDBClient.db('stock-news');
+    const collection = db.collection('articles');
+    const foundCollections = await collection.find({ link: { $in: itemLinks } }).toArray();
+    const foundLinks = foundCollections.map(doc => doc.link);
+    const nonExistingResponse = response.filter(_res => !foundLinks.includes(_res.link));
+
     // @ts-ignore
-    list = await Promise.all(
-      response.map((item) => limit(() => {
+    const nonExistingNewsDetails = await Promise.all(
+      nonExistingResponse.map((item) => limit(() => {
         const url = new URL(item.link);
         const page = 'all';
         url.searchParams.set('page', page);
@@ -152,10 +162,23 @@ export async function fetchAllNewsByDateWithDetail({
       }))
     );
 
-    return list.map((item, index) => ({
-      ...response[index],
-      content: item,
-    }));
+    const nonExistingNewsResponseWithDetails = nonExistingNewsDetails.map((item, index) => {
+      // Omit totalPage from response
+      const { totalPage, ...responseItem } = nonExistingResponse[index];
+      return {
+        ...responseItem,
+        content: item,
+      };
+    });
+
+    if (nonExistingNewsResponseWithDetails.length) {
+      await collection.insertMany(nonExistingNewsResponseWithDetails);
+    }
+
+    return [
+      ...foundCollections.map(({ _id, ...doc }) => ({ ...doc })),
+      ...nonExistingNewsResponseWithDetails,
+    ];
   } catch (error) {
     console.error(error);
     return list;

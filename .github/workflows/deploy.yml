@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: rm -rf node_modules README.md .git .github .vscode .gitignore  # temporary
+      - run: rm -rf node_modules README.md LICENSE .git .github .vscode .gitignore # temporary
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:

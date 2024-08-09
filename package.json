@@ -14,10 +14,12 @@
     "p-limit": "^6.1.0"
   },
   "devDependencies": {
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.5.4"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
+    "dev": "dotenvx run -- npx functions-framework --target=getAllStockNews",
     "start": "npx functions-framework --target=getAllStockNews",
     "prestart": "npm run build",
     "gcp-build": "npm run build"

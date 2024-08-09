@@ -8,5 +8,9 @@
     "outDir": "dist"
   },
   "include": ["lit.ts", "main.ts", "utils.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "verbose": true
+  }
 }
