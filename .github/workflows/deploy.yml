@@ -38,9 +38,5 @@ jobs:
           env_vars: |
             GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},
             GOOGLE_CLOUD_REGION=${{ env.GCP_REGION }},
-          #   NOTION_HABIT_DATABASE_ID=${{ secrets.NOTION_HABIT_DATABASE_ID }},
-          #   NOTION_TOKEN=${{ secrets.NOTION_TOKEN }},
-          #   OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
-          #   TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }},
-          #   TELEGRAM_WHITELISTED_USER_IDS=${{ secrets.TELEGRAM_WHITELISTED_USER_IDS }},
+            MONGODB_ADDRESS=${{ secrets.MONGODB_ADDRESS }},
           secret_volumes: "/secret/GCP_SA_KEY.json=projects/716242506068/secrets/maudy-sa-key"
