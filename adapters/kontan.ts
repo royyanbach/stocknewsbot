@@ -1,12 +1,13 @@
 import fetch from 'node-fetch';
 import { parse } from 'node-html-parser';
 import pLimit from 'p-limit';
-import mongoDBClient from '../service/mongodb';
+import { getArticlesByLinks, saveArticles } from '../service/mongodb';
 import { getNewsSummaryAndInsight } from '../service/chatgpt';
 import { padNumberToString } from '../utils';
 
 const ITEMS_PER_PAGE = 20;
 const CONCURRENCY = 5;
+const SOURCE = 'kontan';
 
 const limit = pLimit(CONCURRENCY);
 
@@ -37,6 +38,7 @@ export async function fetchNewsContent(link: string) {
 type NewsItem = {
   crawledAt: Date;
   link: string;
+  source: string;
   totalPage: number;
   title: string;
 };
@@ -74,6 +76,7 @@ export async function fetchNewsList({
     return articles.map((item) => ({
       crawledAt: new Date(),
       link: item.getAttribute('href') || '',
+      source: SOURCE,
       totalPage: numberedNavigations.length || 1,
       title: item.text,
     }));
@@ -145,10 +148,8 @@ export async function fetchAllNewsByDateWithDetail({
     });
 
     const itemLinks = response.map((item) => item.link);
-    const db = mongoDBClient.db('stock-news');
-    const collection = db.collection('articles');
-    const foundCollections = await collection.find({ link: { $in: itemLinks } }).toArray();
-    const foundLinks = foundCollections.map(doc => doc.link);
+    const foundArticles = await getArticlesByLinks(itemLinks);
+    const foundLinks = foundArticles.map(doc => doc.link);
     const nonExistingResponse = response.filter(_res => !foundLinks.includes(_res.link));
 
     const nonExistingNewsDetails = await Promise.all(
@@ -179,12 +180,10 @@ export async function fetchAllNewsByDateWithDetail({
       ];
     }, [] as NewsItemWithDetail[]);
 
-    if (nonExistingNewsResponseWithDetails.length) {
-      await collection.insertMany(nonExistingNewsResponseWithDetails);
-    }
+    saveArticles(nonExistingNewsResponseWithDetails);
 
     return [
-      ...foundCollections.map(({ _id, ...doc }) => ({ ...doc })),
+      ...foundArticles.map(({ _id, ...doc }) => ({ ...doc })),
       ...nonExistingNewsResponseWithDetails,
     ];
   } catch (error) {

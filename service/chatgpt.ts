@@ -15,7 +15,7 @@ export async function getNewsSummaryAndInsight(newsContent: string): Promise<{
     messages: [
       {
         role: 'system',
-        content: `As a useful investor advisor, summarize this news for me in Indonesian language. Do it in one paragrah only. Then, give me suggestion or insight about the effect to me as an investor. Then, format it into the following JSON structure: { 'summary': <string>, 'insight': <string> };`,
+        content: `As a useful investor advisor, summarize this news for me in Indonesian language. Do it in one paragrah only. Then, give me suggestion or insight about the effect to me as an investor, but never address me as an investor directly. Then, format it into the following JSON structure: { 'summary': <string>, 'insight': <string> };`,
       },
       {
         role: 'user',
