@@ -7,7 +7,7 @@ functions.http('getAllStockNews', async (req, res) => {
     const currentDate = new Date();
     const news = await fetchAllNewsByDateWithDetail({
       // date: currentDate.getDate(),
-      date: 4,
+      date: 3,
       month: currentDate.getMonth() + 1,
       year: currentDate.getFullYear(),
     });

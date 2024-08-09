@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import { parse } from 'node-html-parser';
 import pLimit from 'p-limit';
 import mongoDBClient from '../service/mongodb';
+import { getNewsSummaryAndInsight } from '../service/chatgpt';
 import { padNumberToString } from '../utils';
 
 const ITEMS_PER_PAGE = 20;
@@ -9,7 +10,7 @@ const CONCURRENCY = 5;
 
 const limit = pLimit(CONCURRENCY);
 
-export async function fetchNewsDetail(link: string) {
+export async function fetchNewsContent(link: string) {
   try {
     const response = await fetch(link);
     const body = await response.text();
@@ -29,10 +30,7 @@ export async function fetchNewsDetail(link: string) {
     }).map((item) => item.text.trim()).join(' ');
   } catch (error) {
     console.error(error);
-    return {
-      title: '',
-      content: '',
-    };
+    return '';
   }
 }
 
@@ -125,7 +123,8 @@ export async function fetchAllNewsByDate({
 }
 
 type NewsItemWithDetail = Omit<NewsItem & {
-  content: string;
+  insight: string;
+  summary: string;
 }, 'totalPage'>;
 
 export async function fetchAllNewsByDateWithDetail({
@@ -152,24 +151,33 @@ export async function fetchAllNewsByDateWithDetail({
     const foundLinks = foundCollections.map(doc => doc.link);
     const nonExistingResponse = response.filter(_res => !foundLinks.includes(_res.link));
 
-    // @ts-ignore
     const nonExistingNewsDetails = await Promise.all(
-      nonExistingResponse.map((item) => limit(() => {
+      nonExistingResponse.map((item) => limit(async () => {
         const url = new URL(item.link);
         const page = 'all';
         url.searchParams.set('page', page);
-        return fetchNewsDetail(`${url.toString()}`)
+        const newsContent = await fetchNewsContent(`${url.toString()}`);
+        const summaryAndInsight = await getNewsSummaryAndInsight(newsContent);
+        return summaryAndInsight;
       }))
     );
 
-    const nonExistingNewsResponseWithDetails = nonExistingNewsDetails.map((item, index) => {
+    const nonExistingNewsResponseWithDetails = nonExistingNewsDetails.reduce((acc, newsDetails, index) => {
+      if (!newsDetails) {
+        return acc;
+      }
+
       // Omit totalPage from response
       const { totalPage, ...responseItem } = nonExistingResponse[index];
-      return {
-        ...responseItem,
-        content: item,
-      };
-    });
+      return [
+        ...acc,
+        {
+          ...responseItem,
+          insight: newsDetails.insight,
+          summary: newsDetails.summary,
+        },
+      ];
+    }, [] as NewsItemWithDetail[]);
 
     if (nonExistingNewsResponseWithDetails.length) {
       await collection.insertMany(nonExistingNewsResponseWithDetails);

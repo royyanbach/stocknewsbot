@@ -39,4 +39,5 @@ jobs:
             GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},
             GOOGLE_CLOUD_REGION=${{ env.GCP_REGION }},
             MONGODB_ADDRESS=${{ secrets.MONGODB_ADDRESS }},
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
           secret_volumes: "/secret/GCP_SA_KEY.json=projects/716242506068/secrets/maudy-sa-key"
