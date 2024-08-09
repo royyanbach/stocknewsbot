@@ -125,7 +125,7 @@ export async function fetchAllNewsByDate({
 type NewsItemWithDetail = Omit<NewsItem & {
   insight: string;
   summary: string;
-}, 'totalPage'>;
+}, 'title' | 'totalPage'>;
 
 export async function fetchAllNewsByDateWithDetail({
   date,
@@ -168,7 +168,7 @@ export async function fetchAllNewsByDateWithDetail({
       }
 
       // Omit totalPage from response
-      const { totalPage, ...responseItem } = nonExistingResponse[index];
+      const { title, totalPage, ...responseItem } = nonExistingResponse[index];
       return [
         ...acc,
         {
