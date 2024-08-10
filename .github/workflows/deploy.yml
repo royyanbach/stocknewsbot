@@ -38,6 +38,7 @@ jobs:
           env_vars: |
             GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},
             GOOGLE_CLOUD_REGION=${{ env.GCP_REGION }},
+            GCP_CLOUDTASKS_QUEUE_NAME=${{ secrets.GCP_CLOUDTASKS_QUEUE_NAME }},
             MONGODB_ADDRESS=${{ secrets.MONGODB_ADDRESS }},
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }},
