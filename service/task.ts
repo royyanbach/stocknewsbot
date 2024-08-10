@@ -5,7 +5,7 @@ const client = new CloudTasksClient({
   projectId: process.env.GCP_PROJECT_ID,
 });
 
-export default async function enqueueBroadcastTask(text: string, linkPreviewUrl: string) {
+export default async function enqueueBroadcastTask(text: string, linkPreviewUrl: string, delay?: number) {
   const project = process.env.GCP_PROJECT_ID;
   const queue = process.env.GCP_CLOUDTASKS_QUEUE_NAME;
   const location = process.env.GCP_REGION;
@@ -42,7 +42,7 @@ export default async function enqueueBroadcastTask(text: string, linkPreviewUrl:
         url,
       },
       scheduleTime: {
-        seconds: Math.floor(Date.now() / 1000) + 0,
+        seconds: Math.floor(Date.now() / 1000) + (delay || 0),
       }
     },
   });

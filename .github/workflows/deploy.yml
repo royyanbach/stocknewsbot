@@ -42,4 +42,5 @@ jobs:
             MONGODB_ADDRESS=${{ secrets.MONGODB_ADDRESS }},
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }},
+            TELEGRAM_CHANNEL_ID=${{ secrets.TELEGRAM_CHANNEL_ID }}
           secret_volumes: "/secret/service-account.json=projects/716242506068/secrets/stocknewsbot-sa-key"

@@ -1,20 +1,26 @@
 import * as functions from '@google-cloud/functions-framework';
-import mongoDBClient from './service/mongodb';
-// import { fetchAllNewsByDateWithDetail } from './adapters/kontan';
+import mongoDBClient, { saveArticles } from './service/mongodb';
+import { fetchAllNewsByDateWithDetail } from './adapters/kontan';
 import enqueueBroadcastTask from './service/task';
 
 functions.http('getAllStockNews', async (req, res) => {
   try {
-    await enqueueBroadcastTask();
-    // const currentDate = new Date();
-    // const news = await fetchAllNewsByDateWithDetail({
-    //   // date: currentDate.getDate(),
-    //   date: 3,
-    //   month: currentDate.getMonth() + 1,
-    //   year: currentDate.getFullYear(),
-    // });
+    const currentDate = new Date();
+    const articles = await fetchAllNewsByDateWithDetail({
+      date: currentDate.getDate(),
+      month: currentDate.getMonth() + 1,
+      year: currentDate.getFullYear(),
+    });
 
-    // res.send(`Hello ${req.query.name || req.body.name || 'World'}!`);
+    if (articles.newArticles.length) {
+      await saveArticles(articles.newArticles);
+      await Promise.all(articles.newArticles.map((article, index) => enqueueBroadcastTask(
+        `<u>Ringkasan</u>\n\n${article.summary}\n\n<u>Insight</u>\n\n${article.insight}`,
+        article.link,
+        index,
+      )));
+    }
+
     res.send('OK');
   } catch (error) {
     console.error(error);

@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { parse } from 'node-html-parser';
 import pLimit from 'p-limit';
-import { getArticlesByLinks, saveArticles } from '../service/mongodb';
+import { getArticlesByLinks } from '../service/mongodb';
 import { getNewsSummaryAndInsight } from '../service/chatgpt';
 import { padNumberToString } from '../utils';
 
@@ -138,7 +138,10 @@ export async function fetchAllNewsByDateWithDetail({
   date: number;
   month: number;
   year: number;
-}) {
+}): Promise<{
+  existingArticles: NewsItem[];
+  newArticles: NewsItemWithDetail[];
+}> {
   let list: NewsItemWithDetail[] = [];
   try {
     const response = await fetchAllNewsByDate({
@@ -180,14 +183,18 @@ export async function fetchAllNewsByDateWithDetail({
       ];
     }, [] as NewsItemWithDetail[]);
 
-    saveArticles(nonExistingNewsResponseWithDetails);
+    // saveArticles(nonExistingNewsResponseWithDetails);
 
-    return [
-      ...foundArticles.map(({ _id, ...doc }) => ({ ...doc })),
-      ...nonExistingNewsResponseWithDetails,
-    ];
+    return {
+      // @ts-ignore
+      existingArticles: foundArticles.map(({ _id, ...doc }) => ({ ...doc })),
+      newArticles: nonExistingNewsResponseWithDetails,
+    };
   } catch (error) {
     console.error(error);
-    return list;
+    return {
+      existingArticles: [],
+      newArticles: [],
+    };
   }
 }
