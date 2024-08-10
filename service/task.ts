@@ -5,25 +5,28 @@ const client = new CloudTasksClient({
   projectId: process.env.GCP_PROJECT_ID,
 });
 
-export default async function enqueueBroadcastTask() {
+export default async function enqueueBroadcastTask(text: string, linkPreviewUrl: string) {
   const project = process.env.GCP_PROJECT_ID;
   const queue = process.env.GCP_CLOUDTASKS_QUEUE_NAME;
   const location = process.env.GCP_REGION;
   const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!telegramBotToken || !project || !queue || !location) {
+  const telegramChannelId = process.env.TELEGRAM_CHANNEL_ID;
+  if (!project || !queue || !location || !telegramBotToken || !telegramChannelId) {
     throw new Error('Missing environment variable');
   }
 
   const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
   const payload = JSON.stringify({
-    chat_id: "-1002230742449",
-    link_preview_options: {
-      prefer_small_media: true,
-      show_above_text: true,
-      url: 'https://investor.id/market/369100/mengenal-berbagai-jenis-surat-utang-dan-sukuk',
-    },
+    chat_id: telegramChannelId,
+    ...(linkPreviewUrl ? {
+      link_preview_options: {
+        prefer_small_media: true,
+        show_above_text: true,
+        url: linkPreviewUrl,
+      },
+    } : {}),
     parse_mode: 'html',
-    text: "Isi berita\n\nSaran dll dll",
+    text: text,
   });
   const parent = client.queuePath(project, location, queue);
 
