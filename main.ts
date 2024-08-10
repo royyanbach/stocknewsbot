@@ -1,16 +1,18 @@
 import * as functions from '@google-cloud/functions-framework';
 import mongoDBClient from './service/mongodb';
-import { fetchAllNewsByDateWithDetail } from './adapters/kontan';
+// import { fetchAllNewsByDateWithDetail } from './adapters/kontan';
+import enqueueBroadcastTask from './service/task';
 
 functions.http('getAllStockNews', async (req, res) => {
   try {
-    const currentDate = new Date();
-    const news = await fetchAllNewsByDateWithDetail({
-      // date: currentDate.getDate(),
-      date: 3,
-      month: currentDate.getMonth() + 1,
-      year: currentDate.getFullYear(),
-    });
+    await enqueueBroadcastTask();
+    // const currentDate = new Date();
+    // const news = await fetchAllNewsByDateWithDetail({
+    //   // date: currentDate.getDate(),
+    //   date: 3,
+    //   month: currentDate.getMonth() + 1,
+    //   year: currentDate.getFullYear(),
+    // });
 
     // res.send(`Hello ${req.query.name || req.body.name || 'World'}!`);
     res.send('OK');

@@ -40,4 +40,5 @@ jobs:
             GOOGLE_CLOUD_REGION=${{ env.GCP_REGION }},
             MONGODB_ADDRESS=${{ secrets.MONGODB_ADDRESS }},
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
-          secret_volumes: "/secret/GCP_SA_KEY.json=projects/716242506068/secrets/maudy-sa-key"
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }},
+          secret_volumes: "/secret/service-account.json=projects/716242506068/secrets/stocknewsbot-sa-key"
