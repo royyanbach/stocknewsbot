@@ -6,12 +6,21 @@ const client = new CloudTasksClient({
 });
 
 export default async function enqueueBroadcastTask() {
-  const project = process.env.GCP_PROJECT_ID as string;
+  const project = process.env.GCP_PROJECT_ID;
   const queue = process.env.GCP_CLOUDTASKS_QUEUE_NAME;
   const location = process.env.GCP_REGION;
   const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!telegramBotToken || !project || !queue || !location) {
-    throw new Error('Missing environment variable');
+  if (!telegramBotToken) {
+    throw new Error(' Missing TELEGRAM_BOT_TOKEN');
+  }
+  if (!project) {
+    throw new Error(' Missing GCP_PROJECT_ID');
+  }
+  if (!queue) {
+    throw new Error(' Missing GCP_CLOUDTASKS_QUEUE_NAME');
+  }
+  if (!location) {
+    throw new Error(' Missing GCP_REGION');
   }
 
   const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
