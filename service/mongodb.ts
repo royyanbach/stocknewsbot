@@ -1,4 +1,5 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
+import { NewsItem } from '../constants/type';
 
 const URI = process.env.MONGODB_ADDRESS as string;
 const DB = 'stock-news';
@@ -21,15 +22,7 @@ export async function getArticlesByLinks(links: string[]) {
   return articles;
 }
 
-type article = {
-  crawledAt: Date;
-  link: string;
-  insight: string;
-  source: string;
-  summary: string;
-};
-
-export async function saveArticles(articles: article[]) {
+export async function saveArticles(articles: NewsItem[]) {
   if (articles.length) {
     const db = client.db(DB);
     const collection = db.collection(COLLECTIONS.ARTICLES);
