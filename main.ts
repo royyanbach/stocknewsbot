@@ -35,7 +35,7 @@ functions.http('getAllStockNews', async (req, res) => {
         return enqueueBroadcastTask(
           `<u>Ringkasan</u>\n\n${article.summary}\n\n<u>Insight</u>\n\n${article.insight}`,
           newArticles[index].link,
-          index,
+          index * 60, // delay by 1 minute
         )
       }));
 
