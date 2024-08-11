@@ -14,7 +14,7 @@ export async function fetchNewsContent(link?: string): Promise<string> {
     const response = await fetch(link);
     const body = await response.text();
     const root = parse(body);
-    const articleBody = root.querySelectorAll('.body-content p');
+    const articleBody = root.querySelectorAll('.detailsContent:first-of-type p');
 
     if (!articleBody.length) {
       throw new Error('No data found');
@@ -23,7 +23,6 @@ export async function fetchNewsContent(link?: string): Promise<string> {
     return articleBody.filter((item) => {
       const text = item.text.trim();
       if (!text) return false;
-      if (text.includes('Editor:') && item.querySelector('a')) return false;
       return true;
     }).map((item) => item.text.trim()).join(' ');
   } catch (error) {
@@ -52,28 +51,25 @@ export async function fetchNewsList({
     formData.append('idxmenu', '/market/indeks');
     formData.append('date', `${year}-${month}-${date}`);
     formData.append('tanggal', `${date} ${MONTHS[_month]} ${year}`);
-    const response = await fetch(`https://investor.id/market/indeks/${page}`, { method: 'POST', body: formData });
+    const response = await fetch(`https://www.bisnis.com/index?c=194&d=${year}-${month}-${date}&per_page=${page}`, { method: 'GET' });
     const body = await response.text();
     const root = parse(body);
-    const articles = root.querySelectorAll('main .col:first-child .stretched-link').map((item) => {
-      const href = item.getAttribute('href');
-      if (href) {
-        return `https://investor.id/${href}/all`;
-      }
-      return '';
+    const articles = root.querySelectorAll('.list-news li a .img-responsive').map((img) => {
+      const parentLink = img.parentNode;
+      return parentLink.querySelector('.label-premium') ? '' : (parentLink.getAttribute('href') || '');
     });
-    const totalPage = root.querySelectorAll('ul.pagination .page-item:not(.disabled)').length;
+    const shouldContinueToNextPage = !!root.querySelector('.page-indeks li a[rel="next"]');
 
     const newArticles = [
       ...previousArticles,
       ...articles.map((link) => ({
         crawledAt: new Date(),
         link,
-        source: SOURCE.investor,
+        source: SOURCE.bisnis,
       })),
     ].filter((article) => article.link);
 
-    if (page < totalPage) {
+    if (shouldContinueToNextPage) {
       return fetchNewsList({
         date: _date,
         month: _month,

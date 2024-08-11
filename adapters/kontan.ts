@@ -50,7 +50,6 @@ export async function fetchNewsList({
   page?: number;
   previousArticles?: NewsItem[];
 }): Promise<NewsItem[]> {
-  let articles: NewsItem[] = [];
   try {
     const date = padNumberToString(_date);
     const month = padNumberToString(_month);
@@ -77,7 +76,7 @@ export async function fetchNewsList({
         link: item.getAttribute('href') || '',
         source: SOURCE.kontan,
       })),
-    ];
+    ].filter((article) => article.link);
 
     if (page < totalPage) {
       return fetchNewsList({
@@ -92,6 +91,6 @@ export async function fetchNewsList({
     }
   } catch (error) {
     console.error(error);
-    return articles;
+    return [];
   }
 }
