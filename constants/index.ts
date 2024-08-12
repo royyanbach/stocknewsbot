@@ -8,3 +8,8 @@ export const SOURCE = {
   // reuters: 'reuters',
   // yahoo: 'yahoo',
 } as const;
+
+export const ACTIONS = {
+  FETCH_ALL_AND_BROADCAST: 'FETCH_ALL_AND_BROADCAST',
+  FETCH_ARTICLE_CONTENT_AND_BROADCAST: 'FETCH_ARTICLE_CONTENT_AND_BROADCAST',
+} as const;

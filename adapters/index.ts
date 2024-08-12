@@ -39,6 +39,23 @@ export async function fetchAllTodayArticles() {
   }, Promise.resolve([]));
 }
 
+export async function fetchArticleContent(link?: string) {
+  if (!link) {
+    return '';
+  }
+
+  if (link.includes('www.bisnis.com/')) {
+    return fetchBisnisNewsContent(link);
+  }
+  if (link.includes('investor.id/')) {
+    return fetchInvestorNewsContent(link);
+  }
+  if (link.includes('.kontan.co.id/')) {
+    return fetchKontanNewsContent(link);
+  }
+  return '';
+}
+
 export async function fetchArticleContents(articles: NewsItem[]) {
   return Promise.all(articles.map((article) => limit(async () => {
     if (article.source === SOURCE.bisnis) {
