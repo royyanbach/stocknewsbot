@@ -4,7 +4,8 @@ import { fetchAllTodayArticles, fetchArticleContent, fetchArticleContents } from
 import { ACTIONS, FETCH_CONTENT_CONCURRENCY } from './constants';
 import { getNewsSummaryAndInsight } from './service/chatgpt';
 import mongoDBClient, { getArticlesByLinks, saveArticles } from './service/mongodb';
-import { enqueueBroadcastTask, enqueueFetchArticleContentTask } from './service/task';
+import { enqueueFetchArticleContentTask } from './service/task';
+import { broadcastArticleToChannel } from './service/telegram';
 
 const limit = pLimit(FETCH_CONTENT_CONCURRENCY);
 
@@ -26,13 +27,11 @@ async function fetchArticleContentAndBroadcast(articleLink?: string) {
     return;
   }
 
-  console.log('summaryAndInsight', summaryAndInsight.insight.length);
-  // await enqueueBroadcastTask(
-  //   `<u>Ringkasan</u>\n\n${summaryAndInsight.summary}\n\n<u>Insight</u>\n\n${summaryAndInsight.insight}`,
-  //   articleLink,
-  // );
+  return broadcastArticleToChannel(
+    `<u>Ringkasan</u>\n\n${summaryAndInsight.summary}\n\n<u>Insight</u>\n\n${summaryAndInsight.insight}`,
+    articleLink,
+  );
 }
-
 
 functions.http('getAllStockNews', async (req, res) => {
   const action = req.query.action || ACTIONS.FETCH_ALL_AND_BROADCAST;
@@ -48,7 +47,7 @@ functions.http('getAllStockNews', async (req, res) => {
         await Promise.all(
           newArticles.map(
             (article, index) => limit(
-              async () => enqueueFetchArticleContentTask(article.link, index * 60)
+              async () => await enqueueFetchArticleContentTask(article.link, index)
             )
           )
         );
@@ -58,7 +57,7 @@ functions.http('getAllStockNews', async (req, res) => {
       res.send('OK');
     }
     if (action === ACTIONS.FETCH_ARTICLE_CONTENT_AND_BROADCAST) {
-      const articleLink = req.query.link as string | undefined;
+      const articleLink = req.query.articleLink as string | undefined;
       await fetchArticleContentAndBroadcast(articleLink);
       res.send('OK');
     }
