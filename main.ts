@@ -9,6 +9,7 @@ import { enqueueBroadcastTask, enqueueFetchArticleContentTask } from './service/
 const limit = pLimit(FETCH_CONTENT_CONCURRENCY);
 
 async function fetchArticleContentAndBroadcast(articleLink?: string) {
+  console.log('fetchArticleContentAndBroadcast', articleLink);
   if (!articleLink) {
     return;
   }
@@ -25,10 +26,11 @@ async function fetchArticleContentAndBroadcast(articleLink?: string) {
     return;
   }
 
-  await enqueueBroadcastTask(
-    `<u>Ringkasan</u>\n\n${summaryAndInsight.summary}\n\n<u>Insight</u>\n\n${summaryAndInsight.insight}`,
-    articleLink,
-  );
+  console.log('summaryAndInsight', summaryAndInsight.insight.length);
+  // await enqueueBroadcastTask(
+  //   `<u>Ringkasan</u>\n\n${summaryAndInsight.summary}\n\n<u>Insight</u>\n\n${summaryAndInsight.insight}`,
+  //   articleLink,
+  // );
 }
 
 
