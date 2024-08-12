@@ -10,6 +10,7 @@ export async function fetchNewsContent(link?: string): Promise<string> {
     return '';
   }
 
+  console.log('fetching', link);
   try {
     const response = await fetch(link);
     const body = await response.text();
@@ -44,6 +45,7 @@ export async function fetchNewsList({
   page?: number;
   previousArticles?: NewsItem[];
 }) {
+  console.log('fetchNewsList', { date: _date, month: _month, year, page }, SOURCE.bisnis);
   try {
     const date = padNumberToString(_date);
     const month = padNumberToString(_month);

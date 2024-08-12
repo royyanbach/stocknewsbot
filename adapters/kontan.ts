@@ -11,6 +11,7 @@ export async function fetchNewsContent(link?: string): Promise<string> {
     return '';
   }
 
+  console.log('fetching', link);
   try {
     const url = new URL(link);
     const page = 'all';

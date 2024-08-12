@@ -5,7 +5,7 @@ const URI = process.env.MONGODB_ADDRESS as string;
 const DB = 'stock-news';
 const COLLECTIONS = {
   ARTICLES: 'articles',
-};
+} as const;
 
 const client = new MongoClient(URI, {
   serverApi: {

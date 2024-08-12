@@ -10,6 +10,7 @@ export async function fetchNewsContent(link?: string): Promise<string> {
     return '';
   }
 
+  console.log('fetching', link);
   try {
     const response = await fetch(link);
     const body = await response.text();
