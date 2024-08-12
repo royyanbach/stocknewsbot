@@ -44,13 +44,13 @@ export async function fetchArticleContent(link?: string) {
     return '';
   }
 
-  if (link.includes('www.bisnis.com/')) {
+  if (link.includes('bisnis.com/')) {
     return fetchBisnisNewsContent(link);
   }
   if (link.includes('investor.id/')) {
     return fetchInvestorNewsContent(link);
   }
-  if (link.includes('.kontan.co.id/')) {
+  if (link.includes('kontan.co.id/')) {
     return fetchKontanNewsContent(link);
   }
   return '';
