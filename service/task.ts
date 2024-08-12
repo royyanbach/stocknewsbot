@@ -14,7 +14,7 @@ export async function enqueueFetchArticleContentTask(articleLink: string, delay?
     throw new Error('Missing environment variable');
   }
 
-  const url = `https://${location}-${project}.cloudfunctions.net/fetchArticleContent?action=${ACTIONS.FETCH_ARTICLE_CONTENT_AND_BROADCAST}&articleLink=${encodeURIComponent(articleLink)}`;
+  const url = `https://${location}-${project}.cloudfunctions.net/getAllStockNews?action=${ACTIONS.FETCH_ARTICLE_CONTENT_AND_BROADCAST}&articleLink=${encodeURIComponent(articleLink)}`;
   const parent = client.queuePath(project, location, queue);
 
   return client.createTask({
