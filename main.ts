@@ -21,16 +21,18 @@ async function fetchArticleContentAndBroadcast(articleLink?: string) {
     return;
   }
 
-  const summaryAndInsight = await getNewsSummaryAndInsight(content);
+  console.log('Found content for', articleLink);
 
-  if (!summaryAndInsight) {
-    return;
-  }
+  // const summaryAndInsight = await getNewsSummaryAndInsight(content);
 
-  return broadcastArticleToChannel(
-    `<u>Ringkasan</u>\n\n${summaryAndInsight.summary}\n\n<u>Insight</u>\n\n${summaryAndInsight.insight}`,
-    articleLink,
-  );
+  // if (!summaryAndInsight) {
+  //   return;
+  // }
+
+  // return broadcastArticleToChannel(
+  //   `<u>Ringkasan</u>\n\n${summaryAndInsight.summary}\n\n<u>Insight</u>\n\n${summaryAndInsight.insight}`,
+  //   articleLink,
+  // );
 }
 
 functions.http('getAllStockNews', async (req, res) => {
