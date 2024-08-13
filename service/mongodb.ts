@@ -1,3 +1,4 @@
+import { subDays } from "date-fns";
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import { NewsItem } from '../constants/type';
 
@@ -14,6 +15,17 @@ const client = new MongoClient(URI, {
     deprecationErrors: true,
   }
 });
+
+export async function deletePastArticles() {
+  const db = client.db(DB);
+  const collection = db.collection(COLLECTIONS.ARTICLES);
+  const resp = await collection.deleteMany({
+    crawledAt: {
+      $lt: subDays(new Date(), 1),
+    },
+  });
+  console.log('Deleted', resp.deletedCount, 'articles');
+}
 
 export async function getArticlesByLinks(links: string[]) {
   const db = client.db(DB);

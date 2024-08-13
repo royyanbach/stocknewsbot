@@ -3,7 +3,7 @@ import pLimit from 'p-limit';
 import { fetchAllTodayArticles, fetchArticleContent, fetchArticleContents } from './adapters';
 import { ACTIONS, FETCH_CONTENT_CONCURRENCY } from './constants';
 import { getNewsSummaryAndInsight } from './service/chatgpt';
-import mongoDBClient, { getArticlesByLinks, saveArticles } from './service/mongodb';
+import mongoDBClient, { deletePastArticles, getArticlesByLinks, saveArticles } from './service/mongodb';
 import { enqueueFetchArticleContentTask } from './service/task';
 import { broadcastArticleToChannel } from './service/telegram';
 
@@ -21,8 +21,6 @@ async function fetchArticleContentAndBroadcast(articleLink?: string) {
     return;
   }
 
-  console.log('Found content for', articleLink);
-
   const summaryAndInsight = await getNewsSummaryAndInsight(content);
 
   if (!summaryAndInsight) {
@@ -39,11 +37,14 @@ functions.http('getAllStockNews', async (req, res) => {
   const action = req.query.action || ACTIONS.FETCH_ALL_AND_BROADCAST;
   try {
     if (action === ACTIONS.FETCH_ALL_AND_BROADCAST) {
+      await deletePastArticles();
       const articles = await fetchAllTodayArticles();
 
       const foundArticles = await getArticlesByLinks(articles.map(article => article.link));
       const foundLinks = foundArticles.map(doc => doc.link);
       const newArticles = articles.filter(article => !foundLinks.includes(article.link));
+
+      console.log('Found', newArticles.length, 'articles');
 
       if (newArticles.length) {
         await Promise.all(
