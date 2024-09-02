@@ -23,7 +23,7 @@ async function fetchArticleContentAndBroadcast(articleLink?: string) {
 
   const summaryAndInsight = await getNewsSummaryAndInsight(content);
 
-  if (!summaryAndInsight) {
+  if (!summaryAndInsight || !summaryAndInsight.summary || !summaryAndInsight.insight) {
     return;
   }
 
